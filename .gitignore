@@ -1,0 +1,80 @@
+### ASP.NET Core ###
+# Build results
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+*.user
+*.suo
+*.cache
+*.pdb
+*.mdb
+*.dbmdl
+*.bak
+*.bak2
+*.log
+*.ldf
+*.ndf
+*.rdl.data
+*.rdl.designer.cs
+*.rsp
+*.tmp
+*.svclog
+*.vshost.*
+*.exe
+*.dll
+*.appsettings.Development.json
+*.appsettings.Local.json
+*.appsettings.*.json
+
+# Rider / VS Code / VS
+.idea/
+.vscode/
+.vs/
+
+# Others
+*.ncrunch*
+_ReSharper*/
+*.[Rr]e[Ss]harper
+*.DotSettings.user
+
+### React / Node ###
+# Node modules
+node_modules/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Build output
+build/
+dist/
+.next/
+out/
+
+# Local env files
+.env
+.env.*.local
+
+# Misc
+.DS_Store
+*.swp
+*.swo
+
+### General ###
+# OS generated
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Packages
+*.tgz
+*.zip
+*.tar.gz
+*.gz
+
+# Coverage reports
+coverage/
+*.lcov
