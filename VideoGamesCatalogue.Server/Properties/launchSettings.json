@@ -8,7 +8,7 @@
         "ASPNETCORE_ENVIRONMENT": "Development",
         "ASPNETCORE_HOSTINGSTARTUPASSEMBLIES": "Microsoft.AspNetCore.SpaProxy"
       },
-      "dotnetRunMessages": true,
+      "dotnetRunMessages": true,  
       "applicationUrl": "http://localhost:5264"
     },
     "https": {
