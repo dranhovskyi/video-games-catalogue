@@ -1,37 +1,38 @@
 import { fileURLToPath, URL } from 'node:url';
-
 import { defineConfig } from 'vite';
 import plugin from '@vitejs/plugin-react';
 import fs from 'fs';
 import path from 'path';
-import child_process from 'child_process';
-import { env } from 'process';
 
-const baseFolder =
-    env.APPDATA !== undefined && env.APPDATA !== ''
-        ? `${env.APPDATA}/ASP.NET/https`
-        : `${env.HOME}/.aspnet/https`;
+// Check if we're running in Docker or locally
+const isDocker = fs.existsSync('./certs/key.pem') && fs.existsSync('./certs/cert.pem');
 
-const certificateName = "videogamescatalogue.client";
-const certFilePath = path.join(baseFolder, `${certificateName}.pem`);
-const keyFilePath = path.join(baseFolder, `${certificateName}.key`);
+// Local development HTTPS setup (optional - can be disabled for HTTP)
+const useLocalHttps = false; // Set to true if you want HTTPS locally
 
-if (!fs.existsSync(certFilePath) || !fs.existsSync(keyFilePath)) {
-    if (0 !== child_process.spawnSync('dotnet', [
-        'dev-certs',
-        'https',
-        '--export-path',
-        certFilePath,
-        '--format',
-        'Pem',
-        '--no-password',
-    ], { stdio: 'inherit', }).status) {
-        throw new Error("Could not create certificate.");
+let httpsConfig = undefined;
+
+if (isDocker) {
+    // Docker environment - use generated certificates
+    httpsConfig = {
+        key: fs.readFileSync('./certs/key.pem'),
+        cert: fs.readFileSync('./certs/cert.pem'),
+    };
+} else if (useLocalHttps) {
+    // Local development with HTTPS (create certificates first)
+    const certDir = './local-certs';
+    const keyPath = path.join(certDir, 'key.pem');
+    const certPath = path.join(certDir, 'cert.pem');
+
+    if (fs.existsSync(keyPath) && fs.existsSync(certPath)) {
+        httpsConfig = {
+            key: fs.readFileSync(keyPath),
+            cert: fs.readFileSync(certPath),
+        };
+    } else {
+        console.warn('HTTPS certificates not found for local development. Run the certificate generation script or disable HTTPS.');
     }
 }
-
-const target = env.ASPNETCORE_HTTPS_PORT ? `https://localhost:${env.ASPNETCORE_HTTPS_PORT}` :
-    env.ASPNETCORE_URLS ? env.ASPNETCORE_URLS.split(';')[0] : 'https://localhost:7294';
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -42,16 +43,15 @@ export default defineConfig({
         }
     },
     server: {
-        proxy: {
-            '^/weatherforecast': {
-                target,
-                secure: false
-            }
-        },
+        host: isDocker ? '0.0.0.0' : 'localhost', // Use 0.0.0.0 only in Docker
         port: 5173,
-        https: {
-            key: fs.readFileSync(keyFilePath),
-            cert: fs.readFileSync(certFilePath),
+        https: httpsConfig, // undefined = HTTP, object = HTTPS
+        proxy: {
+            '^/api': {
+                target: 'https://localhost:55027',
+                secure: false,
+                changeOrigin: true
+            }
         }
     }
-})
+});
