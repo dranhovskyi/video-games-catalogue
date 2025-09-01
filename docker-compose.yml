@@ -14,12 +14,6 @@ services:
       - sqlserver_data:/var/opt/mssql
     networks:
       - videogames-network
-    healthcheck:
-      test: /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P "0BEG9se8BAoNtR0umpHR" -Q "SELECT 1" || exit 1
-      interval: 10s
-      timeout: 3s
-      retries: 10
-      start_period: 10s
 
   backend:
     build:
@@ -32,16 +26,9 @@ services:
     ports:
       - "55027:80"
     depends_on:
-      sqlserver:
-        condition: service_healthy
+      - sqlserver
     networks:
       - videogames-network
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:80/swagger/index.html"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
 
   frontend:
     build:
