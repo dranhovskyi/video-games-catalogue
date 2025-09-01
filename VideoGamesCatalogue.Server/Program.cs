@@ -1,3 +1,8 @@
+using Microsoft.EntityFrameworkCore;
+using VideoGamesCatalogue.Server.Data;
+using VideoGamesCatalogue.Server.Services;
+using VideoGamesCatalogue.Server.Services.Interfaces;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -21,6 +26,13 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// Add DbContext
+builder.Services.AddDbContext<VideoGameContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Add custom services
+builder.Services.AddScoped<IVideoGameService, VideoGameService>();
+
 var app = builder.Build();
 
 app.UseDefaultFiles();
@@ -42,5 +54,12 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.MapFallbackToFile("/index.html");
+
+// Ensure database is created
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<VideoGameContext>();
+    context.Database.EnsureCreated();
+}
 
 app.Run();
