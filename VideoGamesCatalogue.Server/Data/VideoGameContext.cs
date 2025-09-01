@@ -21,7 +21,10 @@ namespace VideoGamesCatalogue.Server.Data
                 entity.Property(e => e.UpdatedAt).HasDefaultValueSql("GETUTCDATE()");
             });
 
-            // Seed data
+            // Use STATIC datetime values instead of DateTime.UtcNow
+            var seedDate = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+
+            // Seed data with static dates
             modelBuilder.Entity<VideoGame>().HasData(
                 new VideoGame
                 {
@@ -34,8 +37,8 @@ namespace VideoGamesCatalogue.Server.Data
                     Publisher = "Nintendo",
                     Rating = 9.7m,
                     Description = "An open-world action-adventure game.",
-                    CreatedAt = DateTime.UtcNow,
-                    UpdatedAt = DateTime.UtcNow
+                    CreatedAt = seedDate,  // Static date
+                    UpdatedAt = seedDate   // Static date
                 },
                 new VideoGame
                 {
@@ -48,8 +51,8 @@ namespace VideoGamesCatalogue.Server.Data
                     Publisher = "Sony Interactive Entertainment",
                     Rating = 9.5m,
                     Description = "A third-person action-adventure game.",
-                    CreatedAt = DateTime.UtcNow,
-                    UpdatedAt = DateTime.UtcNow
+                    CreatedAt = seedDate,  // Static date
+                    UpdatedAt = seedDate   // Static date
                 }
             );
         }
