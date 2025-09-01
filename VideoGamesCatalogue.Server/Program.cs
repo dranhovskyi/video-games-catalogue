@@ -68,7 +68,7 @@ using (var scope = app.Services.CreateScope())
         try
         {
             logger.LogInformation("Attempting to connect to database...");
-            context.Database.Migrate(); 
+            context.Database.EnsureCreated();
             logger.LogInformation("Database connection successful!");
             break;
         }
