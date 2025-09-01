@@ -30,6 +30,9 @@
 # Rider / VS Code / VS
 .idea/
 .vscode/
+!.vscode/extensions.json
+!.vscode/tasks.json
+!.vscode/launch.json
 .vs/
 
 # Others

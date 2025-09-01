@@ -37,6 +37,9 @@ if (isDocker) {
 // https://vitejs.dev/config/
 export default defineConfig({
     plugins: [plugin()],
+    build: {
+        sourcemap: true, // Ensure source maps are generated
+    },
     resolve: {
         alias: {
             '@': fileURLToPath(new URL('./src', import.meta.url))

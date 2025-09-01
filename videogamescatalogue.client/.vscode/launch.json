@@ -1,0 +1,18 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "Launch Chrome against localhost",
+            "url": "http://localhost:5173",
+            "webRoot": "${workspaceFolder}",
+            "preLaunchTask": "npm: start",
+            "serverReadyAction": {
+                "pattern": "Local:.*http://localhost:5173",
+                "uriFormat": "http://localhost:5173",
+                "action": "openExternally"
+            }
+        } 
+    ]
+}
