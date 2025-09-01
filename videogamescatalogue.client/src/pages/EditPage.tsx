@@ -4,6 +4,7 @@ import { Form, Button, Alert, Spinner, Row, Col } from 'react-bootstrap';
 import type {CreateVideoGame} from '../types/CreateVideoGame';
 import type {UpdateVideoGame} from '../types/UpdateVideoGame';
 import { videoGameService } from '../services/videoGameService';
+import { validateVideoGame } from '../utils/validation';
 
 const EditPage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
@@ -60,49 +61,11 @@ const EditPage: React.FC = () => {
         }));
     };
 
-    const validateForm = (): string[] => {
-        const errors: string[] = [];
-
-        if (!formData.title?.trim()) {
-            errors.push('Title is required');
-        }
-
-        if (formData.title?.length > 100) {
-            errors.push('Title must be 100 characters or less');
-        }
-
-        if (formData.rating < 0 || formData.rating > 10) {
-            errors.push('Rating must be between 0 and 10');
-        }
-
-        if (formData.genre?.length > 50) {
-            errors.push('Genre must be 50 characters or less');
-        }
-
-        if (formData.platform?.length > 50) {
-            errors.push('Platform must be 50 characters or less');
-        }
-
-        if (formData.developer?.length > 50) {
-            errors.push('Developer must be 50 characters or less');
-        }
-
-        if (formData.publisher?.length > 50) {
-            errors.push('Publisher must be 50 characters or less');
-        }
-
-        if (formData.description?.length > 500) {
-            errors.push('Description must be 500 characters or less');
-        }
-
-        return errors;
-    };
-
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
         // Validate form
-        const validationErrors = validateForm();
+        const validationErrors = validateVideoGame(formData);
         if (validationErrors.length > 0) {
             setError(validationErrors.join(', '));
             return;
