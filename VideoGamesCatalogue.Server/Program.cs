@@ -55,11 +55,38 @@ app.MapControllers();
 
 app.MapFallbackToFile("/index.html");
 
-// Ensure database is created
+// Ensure database is created and migrated with retry logic for Docker
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<VideoGameContext>();
-    context.Database.EnsureCreated();
+    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+    
+    // Wait for SQL Server to be ready with retry logic
+    var retries = 15;
+    while (retries > 0)
+    {
+        try
+        {
+            logger.LogInformation("Attempting to connect to database...");
+            context.Database.EnsureCreated(); // Use this instead of Migrate() for Code First
+            logger.LogInformation("Database connection successful!");
+            break;
+        }
+        catch (Exception ex)
+        {
+            retries--;
+            logger.LogWarning($"Database not ready, retrying... ({retries} attempts left)");
+            logger.LogWarning($"Error: {ex.Message}");
+            
+            if (retries == 0)
+            {
+                logger.LogError("Failed to connect to database after all retries");
+                throw;
+            }
+            
+            Thread.Sleep(5000);
+        }
+    }
 }
 
 app.Run();

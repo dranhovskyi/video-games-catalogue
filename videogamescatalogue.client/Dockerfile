@@ -20,7 +20,7 @@ RUN openssl req -x509 -newkey rsa:4096 -keyout certs/key.pem -out certs/cert.pem
 COPY package*.json ./
 
 # Install dependencies
-RUN npm ci
+RUN npm install
 
 # Copy source code
 COPY . .

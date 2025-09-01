@@ -1,0 +1,70 @@
+version: '3.8'
+
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: videogames-sqlserver
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=0BEG9se8BAoNtR0umpHR
+      - MSSQL_PID=Express
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlserver_data:/var/opt/mssql
+      - ./sql-scripts:/docker-entrypoint-initdb.d
+    networks:
+      - videogames-network
+    healthcheck:
+      test: /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P "0BEG9se8BAoNtR0umpHR" -Q "SELECT 1" || exit 1
+      interval: 10s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+
+  backend:
+    build:
+      context: .
+      dockerfile: VideoGamesCatalogue.Server/Dockerfile
+    container_name: videogames-backend
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=https://+:8081
+    ports:
+      - "55027:8081"
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    networks:
+      - videogames-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "https://localhost:8081/swagger/index.html"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  frontend:
+    build:
+      context: ./videogamescatalogue.client
+      dockerfile: Dockerfile
+    container_name: videogames-frontend
+    environment:
+      - VITE_API_URL=https://localhost:5173
+    ports:
+      - "55028:5173"
+    volumes:
+      - ./videogamescatalogue.client:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+    networks:
+      - videogames-network
+
+volumes:
+  sqlserver_data:
+    driver: local
+
+networks:
+  videogames-network:
+    driver: bridge
