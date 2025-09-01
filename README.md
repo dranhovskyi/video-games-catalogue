@@ -79,7 +79,7 @@ Right click on VideoGamesCatalogue.Server.UnitTests -> Run Tests
 
 ### Connection Details for DB 
 - **Server**: localhost,1433
-- **Database**: master
+- **Database**: VideoGamesCatalogDb
 - **Username**: sa
 - **Password**: 0BEG9se8BAoNtR0umpHR
 
