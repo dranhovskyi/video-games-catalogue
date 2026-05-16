@@ -1,9 +1,17 @@
 using Microsoft.EntityFrameworkCore;
 using VideoGamesCatalogue.Server.Data;
+using VideoGamesCatalogue.Server.Extensions;
 using VideoGamesCatalogue.Server.Services;
 using VideoGamesCatalogue.Server.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Load secrets from AWS Secrets Manager before reading any configuration.
+// In Development the app reads from appsettings.Development.json instead.
+if (builder.Environment.IsProduction())
+{
+    builder.AddAwsSecretsManager();
+}
 
 // Add services to the container.
 
