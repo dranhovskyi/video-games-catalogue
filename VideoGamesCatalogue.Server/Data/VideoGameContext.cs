@@ -16,9 +16,10 @@ namespace VideoGamesCatalogue.Server.Data
             modelBuilder.Entity<VideoGame>(entity =>
             {
                 entity.HasKey(e => e.Id);
-                entity.Property(e => e.Rating).HasColumnType("decimal(3,1)");
-                entity.Property(e => e.CreatedAt).HasDefaultValueSql("GETUTCDATE()");
-                entity.Property(e => e.UpdatedAt).HasDefaultValueSql("GETUTCDATE()");
+                entity.Property(e => e.Rating).HasColumnType("numeric(3,1)");
+                entity.Property(e => e.ReleaseDate).HasColumnType("date");
+                entity.Property(e => e.CreatedAt).HasDefaultValueSql("NOW()");
+                entity.Property(e => e.UpdatedAt).HasDefaultValueSql("NOW()");
             });
 
             // Use STATIC datetime values instead of DateTime.UtcNow
