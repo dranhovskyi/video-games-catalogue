@@ -1,7 +1,6 @@
-version: '3.8'
-
 services:
   sqlserver:
+    platform: linux/amd64
     image: mcr.microsoft.com/mssql/server:2022-latest
     container_name: videogames-sqlserver
     environment:
@@ -14,12 +13,6 @@ services:
       - sqlserver_data:/var/opt/mssql
     networks:
       - videogames-network
-    healthcheck:
-      test: /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P "0BEG9se8BAoNtR0umpHR" -Q "SELECT 1" || exit 1
-      interval: 10s
-      timeout: 3s
-      retries: 10
-      start_period: 10s
 
   backend:
     build:
@@ -28,20 +21,15 @@ services:
     container_name: videogames-backend
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
-      - ASPNETCORE_URLS=http://+:80
+      - ASPNETCORE_URLS=https://+:443;http://+:80
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/https-dev-cert.pfx
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=Password123!
     ports:
-      - "55027:80"
+      - "55027:443"
     depends_on:
-      sqlserver:
-        condition: service_healthy
+      - sqlserver
     networks:
       - videogames-network
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:80/swagger/index.html"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 30s
 
   frontend:
     build:
@@ -49,7 +37,7 @@ services:
       dockerfile: Dockerfile
     container_name: videogames-frontend
     environment:
-      - VITE_API_URL=http://localhost:55027/api
+      - VITE_API_URL=https://localhost:55027/api
     ports:
       - "55028:5173"
     depends_on:

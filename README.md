@@ -43,7 +43,7 @@ docker-compose up --build
 
 ### 3. Access the Application
 - **Frontend**: https://localhost:55028
-- **Backend API Swagger UI**: http://localhost:55027/swagger/index.html
+- **Backend API Swagger UI**: https://localhost:55027/swagger/index.html
 
 ### 4. Stop the Application
 ```bash
