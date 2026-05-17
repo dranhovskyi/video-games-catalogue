@@ -187,26 +187,31 @@ Secret structure:
 
 ### Build and Push Docker Images
 
-EC2 instances are Graviton (`t4g.micro`, ARM64). Build on Apple Silicon Mac — images are ARM64 natively:
+Built from Apple Silicon Mac targeting `linux/amd64` (x86_64) EC2 instances using `docker buildx`:
 
 ```bash
+# One-time: create the multi-platform builder
+docker buildx create --name multiplatform --driver docker-container --use
+
 # Authenticate to ECR
 aws ecr get-login-password --region us-east-2 | \
-  docker login --username AWS --password-stdin <account-id>.dkr.ecr.us-east-2.amazonaws.com
+  docker login --username AWS --password-stdin 303585996953.dkr.ecr.us-east-2.amazonaws.com
 
 # Server
-docker build \
+docker buildx build \
+  --platform linux/amd64 \
+  --push \
   -f VideoGamesCatalogue.Server/Dockerfile.prod \
-  -t <account-id>.dkr.ecr.us-east-2.amazonaws.com/videogames-server:latest \
+  -t 303585996953.dkr.ecr.us-east-2.amazonaws.com/videogames-server:latest \
   .
-docker push <account-id>.dkr.ecr.us-east-2.amazonaws.com/videogames-server:latest
 
 # Client
-docker build \
+docker buildx build \
+  --platform linux/amd64 \
+  --push \
   -f videogamescatalogue.client/Dockerfile.prod \
-  -t <account-id>.dkr.ecr.us-east-2.amazonaws.com/videogames-client:latest \
+  -t 303585996953.dkr.ecr.us-east-2.amazonaws.com/videogames-client:latest \
   videogamescatalogue.client/
-docker push <account-id>.dkr.ecr.us-east-2.amazonaws.com/videogames-client:latest
 ```
 
 ### Deploy New Version
