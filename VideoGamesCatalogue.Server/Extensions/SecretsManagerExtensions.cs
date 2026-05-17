@@ -21,6 +21,13 @@ public static class SecretsManagerExtensions
         var secrets = JsonSerializer.Deserialize<Dictionary<string, string>>(response.SecretString)
             ?? throw new InvalidOperationException($"Secret '{secretName}' is empty or not valid JSON.");
 
-        builder.Configuration.AddInMemoryCollection(secrets!);
+        // AddInMemoryCollection does not apply the __ → : convention that environment variables use,
+        // so convert manually to match ASP.NET Core's configuration hierarchy.
+        var converted = secrets.ToDictionary(
+            kvp => kvp.Key.Replace("__", ":"),
+            kvp => kvp.Value
+        );
+
+        builder.Configuration.AddInMemoryCollection(converted!);
     }
 }

@@ -1,85 +1,216 @@
-# Video Games Catalog
+# Video Games Catalogue
 
-A full-stack web application for managing a video games catalog with browsing and editing capabilities.
+A full-stack web application for managing a video games catalogue with browsing and CRUD capabilities.
+
+## Architecture
+
+```mermaid
+graph TD
+    User(["User Browser"])
+
+    subgraph AWS["AWS — us-east-2"]
+        subgraph Public["Public Subnets (public-1a / public-1b)"]
+            EALB["External ALB\n(internet-facing, port 80)"]
+            ClientEC2["Client EC2 ASG\nt4g.micro — Nginx + React"]
+            IALB["Internal ALB\n(private, port 80)"]
+            ServerEC2["Server EC2 ASG\nt4g.micro — ASP.NET Core :8080"]
+        end
+
+        subgraph Private["Private Subnets (private-1a / private-1b)"]
+            RDS[("RDS PostgreSQL 16\ndb.t3.micro")]
+        end
+
+        SM["AWS Secrets Manager\nvideogames/production"]
+        ECR["Amazon ECR\nDocker Images"]
+        IGW["Internet Gateway"]
+    end
+
+    User -->|HTTP| IGW
+    IGW --> EALB
+    EALB -->|port 80 — ext-alb-sg| ClientEC2
+    ClientEC2 -->|"/api/* — client-sg → int-alb-sg"| IALB
+    IALB -->|port 8080 — server-sg| ServerEC2
+    ServerEC2 -->|PostgreSQL :5432 — rds-sg| RDS
+    ServerEC2 -.->|GetSecretValue IAM role| SM
+    ClientEC2 -.->|Pull image IAM role| ECR
+    ServerEC2 -.->|Pull image IAM role| ECR
+```
+
+### Security Group Chain
+
+```
+Internet → ext-alb-sg (80, 443)
+         → client-sg   (80 from ext-alb-sg)
+         → int-alb-sg  (80 from client-sg)
+         → server-sg   (8080 from int-alb-sg)
+         → rds-sg      (5432 from server-sg)
+```
+
+### Request Flow
+
+| Step | From | To | Details |
+|---|---|---|---|
+| 1 | Browser | External ALB | HTTP :80 |
+| 2 | External ALB | Client EC2 (Nginx) | Serves React SPA |
+| 3 | Browser | External ALB `/api/*` | API call (same origin) |
+| 4 | Client EC2 (Nginx) | Internal ALB | Proxied to :80 |
+| 5 | Internal ALB | Server EC2 | ASP.NET Core :8080 |
+| 6 | Server EC2 | RDS PostgreSQL | :5432 private subnet |
+
+---
+
+## Tech Stack
 
 ### Backend
-- **ASP.NET Core 8.0** - Web API
-- **Entity Framework Core** - ORM with Code First approach
-- **SQL Server 2022 Express** - Database
-- **NUnit + Moq + AutoFixture** - Unit testing
+- **ASP.NET Core 9.0** — Web API
+- **Entity Framework Core 9.0** — ORM, Code First
+- **PostgreSQL 16** — Database (Amazon RDS)
+- **Npgsql** — PostgreSQL EF Core provider
+- **AWS Secrets Manager** — Connection strings and sensitive config
+- **NUnit + Moq + AutoFixture** — Unit testing
 
 ### Frontend
-- **React 18** - UI framework
-- **TypeScript** - Type safety
-- **Vite** - Build tool and dev server
-- **React Router** - Client-side routing
-- **React Bootstrap** - UI components
-- **Axios** - HTTP client
+- **React 19** — UI framework
+- **TypeScript** — Type safety
+- **Vite** — Build tool
+- **React Router 7** — Client-side routing
+- **React Bootstrap** — UI components
+- **Axios** — HTTP client
 
 ### Infrastructure
-- **Docker & Docker Compose** - Containerization
-- **SQL Server 2022** - Database container
+- **Docker & Docker Compose** — Local containerisation
+- **Amazon EC2 Auto Scaling Groups** — Compute (t4g.micro, ARM64/Graviton)
+- **Application Load Balancer** — External (public) + Internal (private)
+- **Amazon RDS PostgreSQL** — Managed database
+- **Amazon ECR** — Docker image registry
+- **AWS Secrets Manager** — Runtime secrets
+- **Amazon VPC** — Network isolation
 
-## 🛠️ Prerequisites
+---
+
+## Local Development
+
+### Prerequisites
 
 - [Docker Desktop](https://www.docker.com/products/docker-desktop)
-- [.NET 8 SDK](https://dotnet.microsoft.com/download) (for local development)
-- [Node.js 20+](https://nodejs.org/) (for local development)
-- [Git](https://git-scm.com/)
+- [.NET 9 SDK](https://dotnet.microsoft.com/download) (for IDE development)
+- [Node.js 20+](https://nodejs.org/) (for IDE development)
 
-## 🚀 Quick Start with Docker (This step is required for creating SQL Server 2022 Exress in a separate container for Local Development Setup)
+### Start with Docker Compose
 
-### 1. Clone the Repository
+Runs the full stack locally — React dev server, ASP.NET Core API, and PostgreSQL:
+
 ```bash
 git clone https://github.com/dranhovskyi/video-games-catalogue.git
 cd video-games-catalogue
+
+docker compose up --build
 ```
 
-### 2. Start All Services
+| Service | URL |
+|---|---|
+| Frontend | https://localhost:55028 |
+| Backend Swagger | https://localhost:55027/swagger/index.html |
+
 ```bash
-# Build and start all containers
-docker-compose up --build
+# Stop
+docker compose down
 ```
 
-### 3. Access the Application
-- **Frontend**: https://localhost:55028
-- **Backend API Swagger UI**: https://localhost:55027/swagger/index.html
+### IDE Development (Visual Studio)
 
-### 4. Stop the Application
+The PostgreSQL container must be running before starting the project in Visual Studio:
+
 ```bash
-docker-compose down
+docker compose up postgres
 ```
 
-## 🔧 Local Development Setup (Please proceed with Quick Start with Docker first to laucnh a SQL Server in container for  local development)
+Then in Visual Studio:
+- Set `VideoGamesCatalogue.Server` as the startup project
+- Run the `https` profile — this starts both backend and frontend
 
-### Backend and Frontend Setup
-- Open Visual Studio
+| Service | URL |
+|---|---|
+| Frontend | http://localhost:5173 |
+| Backend Swagger | https://localhost:7294/swagger/index.html |
 
-- Clean and Build the solution
+### Frontend Debug Mode
 
-- Select VideoGamesCatalogue.Server as a Start Up Project
+With the backend already running:
 
-- Run https configurations -> this will launch Backend and Frontend applications:
+```bash
+cd videogamescatalogue.client
+npm install
+npm run dev
+```
 
-- **Frontend**: http://localhost:5173/
-
-- **Backend API Swagger UI**: https://localhost:7294/swagger/index.html 
-
-
-### Frontend Debug
-- Keep running Backend API and shutdown Frontend process http://localhost:5173/
-- Open videogamescatalogue.client Visual Studio Code after launching Backend API and press F5
-- This will laucnh frontend in Debug mode on http://localhost:5173/
+Frontend opens at `http://localhost:5173`.
 
 ### Running Unit Tests
-Right click on VideoGamesCatalogue.Server.UnitTests -> Run Tests
 
+Right-click `VideoGamesCatalogue.Server.UnitTests` → **Run Tests**
 
-## 🗄️ Database
+---
 
-### Connection Details for DB 
-- **Server**: localhost,1433
-- **Database**: master
-- **Username**: sa
-- **Password**: 0BEG9se8BAoNtR0umpHR
+## Database
 
+### Local (Docker Compose)
+
+| Setting | Value |
+|---|---|
+| Host | `localhost` |
+| Port | `5432` |
+| Database | `videogames` |
+| Username | `postgres` |
+| Password | `SecurePass123` |
+
+The schema and seed data are created automatically on first startup via `EnsureCreated()`.
+
+### Production (Amazon RDS)
+
+Connection string and credentials are stored in **AWS Secrets Manager** under `videogames/production`. The server reads them at startup using the EC2 instance's IAM role — no credentials are stored in the codebase or Docker images.
+
+Secret structure:
+
+```json
+{
+  "ConnectionStrings__DefaultConnection": "Host=<rds-endpoint>;Port=5432;Database=videogames;Username=postgres;Password=<password>;SSL Mode=Require;Trust Server Certificate=true",
+  "AllowedOrigins__0": "http://<external-alb-dns>.elb.amazonaws.com"
+}
+```
+
+---
+
+## Production Deployment
+
+### Build and Push Docker Images
+
+EC2 instances are Graviton (`t4g.micro`, ARM64). Build on Apple Silicon Mac — images are ARM64 natively:
+
+```bash
+# Authenticate to ECR
+aws ecr get-login-password --region us-east-2 | \
+  docker login --username AWS --password-stdin <account-id>.dkr.ecr.us-east-2.amazonaws.com
+
+# Server
+docker build \
+  -f VideoGamesCatalogue.Server/Dockerfile.prod \
+  -t <account-id>.dkr.ecr.us-east-2.amazonaws.com/videogames-server:latest \
+  .
+docker push <account-id>.dkr.ecr.us-east-2.amazonaws.com/videogames-server:latest
+
+# Client
+docker build \
+  -f videogamescatalogue.client/Dockerfile.prod \
+  -t <account-id>.dkr.ecr.us-east-2.amazonaws.com/videogames-client:latest \
+  videogamescatalogue.client/
+docker push <account-id>.dkr.ecr.us-east-2.amazonaws.com/videogames-client:latest
+```
+
+### Deploy New Version
+
+After pushing updated images, trigger an instance refresh on each Auto Scaling Group:
+
+**EC2 → Auto Scaling Groups → select ASG → Instance Refresh → Start**
+
+The ASG terminates old instances and launches new ones that pull the latest image.
