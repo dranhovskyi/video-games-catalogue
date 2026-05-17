@@ -4,6 +4,8 @@ A full-stack web application for managing a video games catalogue with browsing 
 
 ## Architecture
 
+![Architecture Diagram](architecture.svg)
+
 ```mermaid
 graph TD
     User(["User Browser"])

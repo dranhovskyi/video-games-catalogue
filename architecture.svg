@@ -1,0 +1,137 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 830" width="960" height="830" font-family="Arial, Helvetica, sans-serif">
+
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#546E7A"/>
+    </marker>
+    <marker id="arr-orange" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#E65100"/>
+    </marker>
+    <marker id="arr-gray" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#9E9E9E"/>
+    </marker>
+    <marker id="arr-red" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#C2185B"/>
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="960" height="830" fill="#F0F4F8"/>
+
+  <!-- ── USER ─────────────────────────────────────── -->
+  <circle cx="338" cy="34" r="22" fill="#BBDEFB" stroke="#1565C0" stroke-width="2"/>
+  <circle cx="338" cy="27" r="7" fill="#1565C0"/>
+  <path d="M322,50 Q338,40 354,50" fill="#1565C0" stroke="none"/>
+  <text x="338" y="70" text-anchor="middle" font-size="12" fill="#1A237E" font-weight="bold">User Browser</text>
+
+  <!-- Arrow: User → IGW -->
+  <line x1="338" y1="56" x2="338" y2="87" stroke="#546E7A" stroke-width="2" marker-end="url(#arr)"/>
+
+  <!-- ── INTERNET GATEWAY ───────────────────────────── -->
+  <rect x="188" y="90" width="300" height="46" rx="8" fill="#E3F2FD" stroke="#1565C0" stroke-width="2"/>
+  <text x="338" y="109" text-anchor="middle" font-size="13" fill="#0D47A1" font-weight="bold">Internet Gateway</text>
+  <text x="338" y="125" text-anchor="middle" font-size="10" fill="#1565C0">videogames-igw</text>
+
+  <!-- Arrow: IGW → AWS -->
+  <line x1="338" y1="136" x2="338" y2="161" stroke="#546E7A" stroke-width="2" marker-end="url(#arr)"/>
+
+  <!-- ── AWS CLOUD ───────────────────────────────────── -->
+  <rect x="18" y="158" width="928" height="652" rx="14" fill="#FFFDE7" stroke="#FF9900" stroke-width="2.5" stroke-dasharray="10,5"/>
+  <text x="42" y="181" font-size="13" fill="#E65100" font-weight="bold">AWS Cloud — us-east-2</text>
+
+  <!-- ── VPC ────────────────────────────────────────── -->
+  <rect x="38" y="190" width="700" height="604" rx="10" fill="none" stroke="#7B1FA2" stroke-width="1.5" stroke-dasharray="6,4"/>
+  <text x="58" y="208" font-size="11" fill="#7B1FA2">VPC — videogames-vpc  10.0.0.0/16</text>
+
+  <!-- ── PUBLIC SUBNETS ─────────────────────────────── -->
+  <rect x="56" y="216" width="664" height="370" rx="8" fill="#E8F5E9" stroke="#2E7D32" stroke-width="1.5"/>
+  <text x="76" y="234" font-size="11" fill="#1B5E20" font-weight="bold">Public Subnets — public-1a / public-1b</text>
+
+  <!-- External ALB -->
+  <rect x="148" y="244" width="380" height="56" rx="8" fill="#E8EAF6" stroke="#3F51B5" stroke-width="2"/>
+  <text x="338" y="267" text-anchor="middle" font-size="13" fill="#1A237E" font-weight="bold">External ALB</text>
+  <text x="338" y="284" text-anchor="middle" font-size="10" fill="#3F51B5">internet-facing · port 80 · ext-alb-sg</text>
+
+  <!-- Arrow: ExtALB → ClientEC2 -->
+  <line x1="338" y1="300" x2="338" y2="328" stroke="#546E7A" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="346" y="319" font-size="9" fill="#546E7A">port 80</text>
+
+  <!-- Client EC2 ASG -->
+  <rect x="148" y="331" width="380" height="68" rx="8" fill="#C8E6C9" stroke="#2E7D32" stroke-width="2"/>
+  <text x="338" y="354" text-anchor="middle" font-size="13" fill="#1B5E20" font-weight="bold">Client EC2 ASG</text>
+  <text x="338" y="371" text-anchor="middle" font-size="10" fill="#2E7D32">t4g.micro (Graviton ARM64) · Nginx + React · client-sg</text>
+  <text x="338" y="387" text-anchor="middle" font-size="9" fill="#388E3C">Serves React SPA · proxies /api/* to Internal ALB</text>
+
+  <!-- Arrow: ClientEC2 → IntALB -->
+  <line x1="338" y1="399" x2="338" y2="428" stroke="#546E7A" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="346" y="418" font-size="9" fill="#546E7A">/api/* proxy</text>
+
+  <!-- Internal ALB -->
+  <rect x="148" y="431" width="380" height="56" rx="8" fill="#E8EAF6" stroke="#3F51B5" stroke-width="2"/>
+  <text x="338" y="454" text-anchor="middle" font-size="13" fill="#1A237E" font-weight="bold">Internal ALB</text>
+  <text x="338" y="471" text-anchor="middle" font-size="10" fill="#3F51B5">private (internal) · port 80 · int-alb-sg</text>
+
+  <!-- Arrow: IntALB → ServerEC2 -->
+  <line x1="338" y1="487" x2="338" y2="514" stroke="#546E7A" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="346" y="505" font-size="9" fill="#546E7A">port 8080</text>
+
+  <!-- Server EC2 ASG -->
+  <rect x="148" y="517" width="380" height="58" rx="8" fill="#C8E6C9" stroke="#2E7D32" stroke-width="2"/>
+  <text x="338" y="541" text-anchor="middle" font-size="13" fill="#1B5E20" font-weight="bold">Server EC2 ASG</text>
+  <text x="338" y="558" text-anchor="middle" font-size="10" fill="#2E7D32">t4g.micro (Graviton ARM64) · ASP.NET Core 9 :8080 · server-sg</text>
+
+  <!-- ── PRIVATE SUBNETS ────────────────────────────── -->
+  <rect x="56" y="600" width="664" height="176" rx="8" fill="#FFF3E0" stroke="#E65100" stroke-width="1.5"/>
+  <text x="76" y="618" font-size="11" fill="#E65100" font-weight="bold">Private Subnets — private-1a / private-1b</text>
+
+  <!-- Arrow: ServerEC2 → RDS -->
+  <line x1="338" y1="575" x2="338" y2="624" stroke="#E65100" stroke-width="1.5" marker-end="url(#arr-orange)"/>
+  <text x="346" y="605" font-size="9" fill="#E65100">PostgreSQL :5432</text>
+
+  <!-- RDS -->
+  <rect x="148" y="627" width="380" height="66" rx="8" fill="#FFE0B2" stroke="#E65100" stroke-width="2"/>
+  <text x="338" y="650" text-anchor="middle" font-size="13" fill="#BF360C" font-weight="bold">Amazon RDS — PostgreSQL 16</text>
+  <text x="338" y="667" text-anchor="middle" font-size="10" fill="#E65100">db.t3.micro · private subnets · rds-sg</text>
+  <text x="338" y="682" text-anchor="middle" font-size="9" fill="#EF6C00">videogames database · no public access</text>
+
+  <!-- ── RIGHT SIDE SERVICES ─────────────────────────── -->
+
+  <!-- ECR (aligned with Client EC2) -->
+  <rect x="758" y="331" width="174" height="68" rx="8" fill="#FFF9C4" stroke="#F9A825" stroke-width="1.5"/>
+  <text x="845" y="354" text-anchor="middle" font-size="12" fill="#E65100" font-weight="bold">Amazon ECR</text>
+  <text x="845" y="371" text-anchor="middle" font-size="10" fill="#F57F17">videogames-client</text>
+  <text x="845" y="387" text-anchor="middle" font-size="10" fill="#F57F17">videogames-server</text>
+
+  <!-- Secrets Manager (aligned with Server EC2) -->
+  <rect x="758" y="517" width="174" height="58" rx="8" fill="#FCE4EC" stroke="#C2185B" stroke-width="1.5"/>
+  <text x="845" y="540" text-anchor="middle" font-size="12" fill="#880E4F" font-weight="bold">Secrets Manager</text>
+  <text x="845" y="557" text-anchor="middle" font-size="10" fill="#AD1457">videogames/production</text>
+  <text x="845" y="569" text-anchor="middle" font-size="9" fill="#C2185B">conn string · CORS origins</text>
+
+  <!-- ── DASHED CONNECTIONS ─────────────────────────── -->
+
+  <!-- ClientEC2 → ECR (horizontal) -->
+  <line x1="528" y1="358" x2="758" y2="358" stroke="#9E9E9E" stroke-width="1.5" stroke-dasharray="6,4" marker-end="url(#arr-gray)"/>
+  <text x="643" y="351" text-anchor="middle" font-size="9" fill="#757575">pull image</text>
+
+  <!-- ServerEC2 → ECR (L-shape: right, up, right) -->
+  <polyline points="528,535 706,535 706,382 758,382"
+    fill="none" stroke="#9E9E9E" stroke-width="1.5" stroke-dasharray="6,4" marker-end="url(#arr-gray)"/>
+
+  <!-- ServerEC2 → Secrets Manager (horizontal) -->
+  <line x1="528" y1="546" x2="758" y2="546" stroke="#C2185B" stroke-width="1.5" stroke-dasharray="6,4" marker-end="url(#arr-red)"/>
+  <text x="643" y="539" text-anchor="middle" font-size="9" fill="#C2185B">GetSecretValue (IAM Role)</text>
+
+  <!-- ── SECURITY GROUP LEGEND ──────────────────────── -->
+  <rect x="760" y="628" width="174" height="126" rx="8" fill="#FAFAFA" stroke="#B0BEC5" stroke-width="1"/>
+  <text x="847" y="646" text-anchor="middle" font-size="10" fill="#37474F" font-weight="bold">Security Group Chain</text>
+  <line x1="776" y1="652" x2="918" y2="652" stroke="#CFD8DC" stroke-width="1"/>
+  <text x="776" y="666" font-size="9" fill="#546E7A">ext-alb-sg  → 80/443 from 0.0.0.0/0</text>
+  <text x="776" y="681" font-size="9" fill="#546E7A">client-sg     → 80 from ext-alb-sg</text>
+  <text x="776" y="696" font-size="9" fill="#546E7A">int-alb-sg   → 80 from client-sg</text>
+  <text x="776" y="711" font-size="9" fill="#546E7A">server-sg    → 8080 from int-alb-sg</text>
+  <text x="776" y="726" font-size="9" fill="#546E7A">rds-sg        → 5432 from server-sg</text>
+  <line x1="776" y1="732" x2="918" y2="732" stroke="#CFD8DC" stroke-width="1"/>
+  <text x="776" y="744" font-size="8" fill="#90A4AE">── dashed = IAM / ECR pull</text>
+
+</svg>
